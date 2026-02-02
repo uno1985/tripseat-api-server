@@ -1,17 +1,20 @@
 const jsonServer = require("json-server");
+const auth = require("json-server-auth"); // 引入 auth
 const server = jsonServer.create();
 const router = jsonServer.router("db.json");
 const middlewares = jsonServer.defaults();
-const cors = require("cors");
 
-server.use(cors());
+// 必備！將 db 綁定到 server，這樣 auth 才知道要去哪裡找 user
+server.db = router.db;
+
 server.use(middlewares);
+
+// 關鍵點：在 router 之前使用 auth
+server.use(auth);
+
 server.use(router);
 
-// Render 會自動分配 PORT，若無則預設 3000
 const port = process.env.PORT || 3000;
-
-// 建議加上 '0.0.0.0'，確保 Render 的對外連線穩定
-server.listen(port, "0.0.0.0", () => {
-  console.log(`JSON Server is running on port ${port}`);
+server.listen(port, () => {
+  console.log(`JSON Server with Auth is running on port ${port}`);
 });
